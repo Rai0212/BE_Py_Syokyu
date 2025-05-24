@@ -78,6 +78,19 @@ class ResponseTodoList(BaseModel):
     updated_at: datetime = Field(title="datetime that the item was updated")
 
 
-@app.get("/hello", tags=["Hello"])
-def get_hello():
-    return {"Message": "Hello FastAPI!"}
+# "/echo": パスオペレーションデコレータ．
+@app.get("/echo", tags=["Hello"])  # APIパスの定義，デコレータ．  # noqa: RUF003
+def get_echo(message: str, name: str):  # パスオペレーション関数
+    return {"Message": message + " " + name + "!"}
+
+
+@app.get("/plus")
+def plus(a: int, b: int):
+    """2つの整数を受け取り、その和を返すエンドポイント."""
+    return a + b
+
+
+@app.get("/health", tags=["System"])
+def get_health():
+    """ヘルスチェック用のエンドポイント."""
+    return {"status": "ok"}
