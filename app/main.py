@@ -1,8 +1,15 @@
 import os
 from datetime import datetime
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
+
+# My implementation
+from fastapi import Depends
+from .dependencies import get_db
+from sqlalchemy.orm import Session
+
+
 
 from app.const import TodoItemStatusCode
 
@@ -76,6 +83,7 @@ class ResponseTodoList(BaseModel):
     description: str | None = Field(default=None, title="Todo List Description", min_length=1, max_length=200)
     created_at: datetime = Field(title="datetime that the item was created")
     updated_at: datetime = Field(title="datetime that the item was updated")
+    model_config = {"from_attributes": True}
 
 
 # "/echo": パスオペレーションデコレータ．
@@ -94,3 +102,12 @@ def plus(a: int, b: int):
 def get_health():
     """ヘルスチェック用のエンドポイント."""
     return {"status": "ok"}
+
+
+@app.get("/lists/{todo_list_id}", response_model=ResponseTodoList, tags=["Todoリスト"])
+def get_todo_list(todo_list_id: int, db: Session = Depends(get_db)):
+    """指定されたIDのTODOリストを取得するエンドポイント."""
+    todo_list = db.query(ListModel).filter(ListModel.id == todo_list_id).first()
+    if not todo_list:
+        raise HTTPException(status_code=404, detail="Todo list not found")
+    return ResponseTodoList.model_validate(todo_list)
