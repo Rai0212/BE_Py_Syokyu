@@ -1,3 +1,3 @@
 FROM mysql:8
 
-RUN chown mysql:mysql /var/log/mysql
+RUN mkdir -p /var/log/mysql && chown mysql:mysql /var/log/mysql
