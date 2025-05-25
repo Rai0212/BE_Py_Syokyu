@@ -143,3 +143,15 @@ def put_todo_list(
     db.commit()
     db.refresh(todo_list)
     return ResponseTodoList.model_validate(todo_list)
+
+
+@app.delete("/lists/{todo_list_id}", tags=["Todoリスト"])
+def delete_todo_list(todo_list_id: int, db: Session = Depends(get_db)):
+    """指定されたIDのTODOリストを削除するエンドポイント."""
+    todo_list = db.query(ListModel).filter(ListModel.id == todo_list_id).first()
+    if not todo_list: # IDのToDOリストが存在しない場合
+        raise HTTPException(status_code=404, detail="Todo list not found")
+
+    db.delete(todo_list)
+    db.commit()
+    return {}
