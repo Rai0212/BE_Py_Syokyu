@@ -136,9 +136,9 @@ def put_todo_list(
         raise HTTPException(status_code=404, detail="Todo list not found")
 
     if update_todo_list.title is not None:
-        todo_list.title = update_todo_list.title
+        todo_list.title = update_todo_list.title # type: ignore
     if update_todo_list.description is not None:
-        todo_list.description = update_todo_list.description
+        todo_list.description = update_todo_list.description # type: ignore
 
     db.commit()
     db.refresh(todo_list)
