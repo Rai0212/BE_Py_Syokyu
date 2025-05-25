@@ -111,3 +111,35 @@ def get_todo_list(todo_list_id: int, db: Session = Depends(get_db)):
     if not todo_list:
         raise HTTPException(status_code=404, detail="Todo list not found")
     return ResponseTodoList.model_validate(todo_list)
+
+
+@app.post("/lists", response_model=ResponseTodoList, tags=["Todoリスト"])
+def post_todo_list(new_todo_list: NewTodoList, db: Session = Depends(get_db)):
+    """新しいTODOリストを作成するエンドポイント."""
+    todo_list = ListModel(
+        title=new_todo_list.title,
+        description=new_todo_list.description,
+    )
+    db.add(todo_list)
+    db.commit()
+    db.refresh(todo_list)
+    return ResponseTodoList.model_validate(todo_list)
+
+
+@app.put("/lists/{todo_list_id}", response_model=ResponseTodoList, tags=["Todoリスト"])
+def put_todo_list(
+    todo_list_id: int, update_todo_list: UpdateTodoList, db: Session = Depends(get_db)
+):
+    """指定されたIDのTODOリストを更新するエンドポイント."""
+    todo_list = db.query(ListModel).filter(ListModel.id == todo_list_id).first()
+    if not todo_list:
+        raise HTTPException(status_code=404, detail="Todo list not found")
+
+    if update_todo_list.title is not None:
+        todo_list.title = update_todo_list.title
+    if update_todo_list.description is not None:
+        todo_list.description = update_todo_list.description
+
+    db.commit()
+    db.refresh(todo_list)
+    return ResponseTodoList.model_validate(todo_list)
